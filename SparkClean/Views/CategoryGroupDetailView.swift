@@ -163,13 +163,15 @@ struct CategoryRowView: View {
                 Capsule()
                     .fill(category.safetyLevel.color.opacity(0.12))
             )
-            .help(category.safetyLevel.label)
+            .help(safetyTooltip(category.safetyLevel))
+            .accessibilityLabel("Safety level: \(category.safetyLevel.rawValue)")
 
             if category.isDockerResource {
                 Image(systemName: "cube.box")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .help("Docker resource — cleaned via Docker CLI")
+                    .help("Docker resource — cleaned via Docker CLI instead of direct file deletion")
+                    .accessibilityLabel("Docker resource")
             }
 
             Button {
@@ -179,7 +181,8 @@ struct CategoryRowView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .help("Show detailed breakdown")
+            .help("Show detailed breakdown of files in this category")
+            .accessibilityLabel("Show details for \(category.name)")
             .popover(isPresented: $showDetails) {
                 PathBreakdownView(category: category)
                     .frame(width: 540, height: 380)
@@ -201,6 +204,16 @@ struct CategoryRowView: View {
         .onHover { isHovered = $0 }
         .opacity(isSelected ? 1.0 : 0.55)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(category.name), \(CleanupManager.formatBytes(category.size)), \(category.safetyLevel.rawValue)")
+    }
+
+    private func safetyTooltip(_ level: SafetyLevel) -> String {
+        switch level {
+        case .safe: "Safe to delete — caches and temp files that rebuild automatically. No risk of data loss."
+        case .review: "Review before deleting — user files that may be wanted. Check the contents first."
+        case .caution: "Use caution — app data or system files that could affect running applications."
+        }
     }
 }
 

@@ -75,10 +75,24 @@ enum SafetyLevel: String, Codable {
     }
 }
 
+// MARK: - Constants
+
+enum ScanConstants {
+    static let minCacheSizeBytes: Int64 = 100_000       // 100KB
+    static let minSystemCacheSizeBytes: Int64 = 500_000 // 500KB
+    static let minNodeModulesSizeBytes: Int64 = 1_000_000 // 1MB
+    static let minCacheTotalBytes: Int64 = 500_000      // 500KB
+    static let minSystemCacheTotalBytes: Int64 = 1_000_000 // 1MB
+    static let installerFileAgeDays = 14
+    static let secondsPerDay: Double = 86400
+    static let maxBreakdownEntries = 60
+    static let maxNodeModulesEntries = 50
+}
+
 // MARK: - Data Models
 
 struct PathStat: Identifiable {
-    let id = UUID()
+    var id: String { path }
     let path: String
     let size: Int64
     let fileCount: Int
@@ -86,7 +100,11 @@ struct PathStat: Identifiable {
     var lastAccessed: Date? = nil
 }
 
-struct CleanupCategory: Identifiable {
+struct CleanupCategory: Identifiable, Equatable {
+    static func == (lhs: CleanupCategory, rhs: CleanupCategory) -> Bool {
+        lhs.id == rhs.id
+    }
+
     let id = UUID()
     let name: String
     let icon: String
@@ -148,6 +166,7 @@ struct ScanSummary {
     let totalFiles: Int
     let scanDuration: TimeInterval
     let timestamp: Date
+    var wasPartial: Bool = false
 }
 
 // MARK: - Sidebar Selection
@@ -160,7 +179,11 @@ enum SidebarItem: Hashable {
 
 // MARK: - App Info (Uninstaller)
 
-struct AppInfo: Identifiable {
+struct AppInfo: Identifiable, Equatable {
+    static func == (lhs: AppInfo, rhs: AppInfo) -> Bool {
+        lhs.id == rhs.id
+    }
+
     let id = UUID()
     let name: String
     let bundleID: String
@@ -188,4 +211,13 @@ enum AppSortOrder: String, CaseIterable {
     case totalSize = "Total Size"
     case appSize = "App Size"
     case relatedSize = "Related Data"
+}
+
+// MARK: - Release Notes
+
+struct ReleaseNote: Identifiable {
+    let id = UUID()
+    let version: String
+    let date: String
+    let notes: [String]
 }

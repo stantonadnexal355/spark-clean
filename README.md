@@ -39,3 +39,7 @@ open ~/Library/Developer/Xcode/DerivedData/SparkClean-*/Build/Products/Release/S
 ## Author
 
 George Khananaev
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.

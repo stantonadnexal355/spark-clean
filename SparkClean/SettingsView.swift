@@ -39,7 +39,7 @@ struct SettingsView: View {
                     Label("About", systemImage: "info.circle")
                 }
         }
-        .frame(width: 480, height: 340)
+        .frame(width: 480, height: 380)
     }
 
     // MARK: General
@@ -140,7 +140,7 @@ struct SettingsView: View {
     // MARK: About
 
     private var aboutTab: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             Spacer()
 
             Image(systemName: "sparkles")
@@ -157,7 +157,8 @@ struct SettingsView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "2.0.0") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"))")
+            let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+            Text("Version \(version)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -166,13 +167,27 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
-            Spacer()
+            HStack(spacing: 16) {
+                Link("Contact Support", destination: URL(string: "mailto:george@khananaev.com")!)
+                    .font(.caption)
 
-            Text("Created by George Khananaev")
-                .font(.caption)
+                Text("·").foregroundStyle(.tertiary)
+
+                Link("Report a Bug", destination: URL(string: "mailto:george@khananaev.com?subject=SparkClean%20Bug%20Report")!)
+                    .font(.caption)
+            }
+
+            Text("macOS \(ProcessInfo.processInfo.operatingSystemVersionString)")
+                .font(.caption2)
                 .foregroundStyle(.tertiary)
 
             Spacer()
+
+            Text("Copyright \u{00A9} 2026 George Khananaev. All rights reserved.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
+            Spacer().frame(height: 8)
         }
         .frame(maxWidth: .infinity)
     }

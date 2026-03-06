@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import AppKit
+import os
 
 // MARK: - CleanupManager
 
@@ -20,14 +21,19 @@ class CleanupManager {
     var cleanComplete = false
     var lastCleanedSize: Int64 = 0
     var lastCleanedCount: Int = 0
+    var cleanErrors: [String] = []
+    var cleanSuccessCount: Int = 0
+    var cleanFailCount: Int = 0
     var currentScanItem = ""
     var scanProgress: Double = 0
+    var cleanProgress: Double = 0
     var diskUsage: DiskUsageInfo?
     var lastScanSummary: ScanSummary?
     var searchQuery = ""
-    private var cancelRequested: Bool = false
+    var scanErrors: [String] = []
+    private let cancelLock = OSAllocatedUnfairLock(initialState: false)
     private var scanStartTime: Date?
-    private var scannedPaths: Set<String> = []
+    private let scannedPathsLock = OSAllocatedUnfairLock(initialState: Set<String>())
 
     var totalSize: Int64 {
         filteredCategories.filter(\.isSelected).reduce(0) { $0 + $1.size }
@@ -474,10 +480,11 @@ class CleanupManager {
             categories = []
             currentScanItem = ""
             scanProgress = 0
-            cancelRequested = false
+            scanErrors = []
             scanStartTime = Date()
         }
-        scannedPaths = []
+        cancelLock.withLock { $0 = false }
+        resetScannedPaths()
 
         fetchDiskUsage()
 
@@ -530,7 +537,7 @@ class CleanupManager {
                         breakdown.append(PathStat(path: path, size: size, fileCount: count))
                         combinedSize += size
                         combinedCount += count
-                        scannedPaths.insert(path)
+                        insertScannedPath(path)
                     }
                 }
 
@@ -595,9 +602,22 @@ class CleanupManager {
         }
 
         if cancelRequested {
+            // Keep partial results instead of discarding everything
+            let scanDuration = Date().timeIntervalSince(scanStartTime ?? Date())
             await MainActor.run {
-                isScanning = false; scanComplete = false
-                currentScanItem = ""; scanProgress = 0
+                isScanning = false
+                scanComplete = !categories.isEmpty
+                currentScanItem = ""
+                scanProgress = 0
+                if !categories.isEmpty {
+                    categories.sort { $0.size > $1.size }
+                    lastScanSummary = ScanSummary(
+                        totalCategories: categories.count, totalSize: overallSize,
+                        totalFiles: categories.reduce(0) { $0 + $1.fileCount },
+                        scanDuration: scanDuration, timestamp: Date(),
+                        wasPartial: true
+                    )
+                }
             }
             return
         }
@@ -610,64 +630,115 @@ class CleanupManager {
             lastScanSummary = ScanSummary(
                 totalCategories: categories.count, totalSize: overallSize,
                 totalFiles: categories.reduce(0) { $0 + $1.fileCount },
-                scanDuration: scanDuration, timestamp: Date()
+                scanDuration: scanDuration, timestamp: Date(),
+                wasPartial: false
             )
         }
     }
 
-    func cancelScan() { cancelRequested = true }
+    func cancelScan() { cancelLock.withLock { $0 = true } }
+
+    private var cancelRequested: Bool {
+        cancelLock.withLock { $0 }
+    }
+
+    private func insertScannedPath(_ path: String) {
+        scannedPathsLock.withLock { $0.insert(path) }
+    }
+
+    private func isPathScanned(_ path: String) -> Bool {
+        scannedPathsLock.withLock { $0.contains(path) }
+    }
+
+    private func scannedPathsSnapshot() -> Set<String> {
+        scannedPathsLock.withLock { $0 }
+    }
+
+    private func resetScannedPaths() {
+        scannedPathsLock.withLock { $0.removeAll() }
+    }
 
     // MARK: - Clean
 
     func clean() async {
         let cleanedSize = totalSize
         let cleanedCount = selectedCategoryCount
-        await MainActor.run { isCleaning = true }
+        await MainActor.run {
+            isCleaning = true
+            cleanProgress = 0
+            cleanErrors = []
+            cleanSuccessCount = 0
+            cleanFailCount = 0
+        }
 
         let selectedCategories = categories.filter(\.isSelected)
         let useTrash = settingPreferTrash
+        let totalCategories = selectedCategories.count
 
-        for category in selectedCategories {
+        for (catIndex, category) in selectedCategories.enumerated() {
             if category.isDockerResource, let command = category.dockerCleanCommand {
                 await runDockerClean(command: command)
+                await MainActor.run {
+                    cleanSuccessCount += 1
+                    cleanProgress = Double(catIndex + 1) / Double(totalCategories)
+                }
                 continue
             }
 
             let paths = category.paths
             let deleteChildrenOnly = category.deleteChildrenOnly
+            let categoryName = category.name
 
-            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let errors: [String] = await withCheckedContinuation { (continuation: CheckedContinuation<[String], Never>) in
                 DispatchQueue.global(qos: .userInitiated).async {
                     let fm = FileManager.default
+                    var localErrors: [String] = []
+
+                    func deleteItem(at url: URL) {
+                        if useTrash {
+                            if (try? fm.trashItem(at: url, resultingItemURL: nil)) == nil {
+                                do {
+                                    try fm.removeItem(at: url)
+                                } catch {
+                                    localErrors.append("\(categoryName): Failed to remove \(url.lastPathComponent) — \(error.localizedDescription)")
+                                }
+                            }
+                        } else {
+                            do {
+                                try fm.removeItem(at: url)
+                            } catch {
+                                localErrors.append("\(categoryName): Failed to remove \(url.lastPathComponent) — \(error.localizedDescription)")
+                            }
+                        }
+                    }
+
                     if deleteChildrenOnly {
                         for path in paths {
                             guard let contents = try? fm.contentsOfDirectory(atPath: path) else { continue }
                             for item in contents {
-                                let fullPath = (path as NSString).appendingPathComponent(item)
-                                let url = URL(fileURLWithPath: fullPath)
-                                if useTrash {
-                                    if (try? fm.trashItem(at: url, resultingItemURL: nil)) == nil {
-                                        try? fm.removeItem(at: url)
-                                    }
-                                } else {
-                                    try? fm.removeItem(at: url)
+                                autoreleasepool {
+                                    let fullPath = (path as NSString).appendingPathComponent(item)
+                                    deleteItem(at: URL(fileURLWithPath: fullPath))
                                 }
                             }
                         }
                     } else {
                         for path in paths {
-                            let url = URL(fileURLWithPath: path)
-                            if useTrash {
-                                if (try? fm.trashItem(at: url, resultingItemURL: nil)) == nil {
-                                    try? fm.removeItem(at: url)
-                                }
-                            } else {
-                                try? fm.removeItem(at: url)
-                            }
+                            deleteItem(at: URL(fileURLWithPath: path))
                         }
                     }
-                    continuation.resume()
+                    continuation.resume(returning: localErrors)
                 }
+            }
+
+            await MainActor.run {
+                if errors.isEmpty {
+                    cleanSuccessCount += 1
+                } else {
+                    cleanFailCount += 1
+                    cleanErrors.append(contentsOf: errors)
+                }
+                cleanProgress = Double(catIndex + 1) / Double(totalCategories)
             }
         }
 
@@ -765,8 +836,9 @@ class CleanupManager {
         let dir = "\(Self.home)/Library/Caches"
         guard fm.fileExists(atPath: dir) else { return nil }
 
+        let scannedSnapshot = scannedPathsSnapshot()
         return await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [scannedPaths] in
+            DispatchQueue.global(qos: .userInitiated).async {
                 guard let entries = try? fm.contentsOfDirectory(atPath: dir) else {
                     continuation.resume(returning: nil)
                     return
@@ -778,21 +850,23 @@ class CleanupManager {
                 var totalCount: Int = 0
 
                 for entry in entries {
+                    autoreleasepool {
                     let fullPath = (dir as NSString).appendingPathComponent(entry)
                     // Skip entries already covered by specific scans
-                    if scannedPaths.contains(fullPath) { continue }
-                    if scannedPaths.contains(where: { $0.hasPrefix(fullPath + "/") || fullPath.hasPrefix($0 + "/") }) { continue }
+                    if scannedSnapshot.contains(fullPath) { return }
+                    if scannedSnapshot.contains(where: { $0.hasPrefix(fullPath + "/") || fullPath.hasPrefix($0 + "/") }) { return }
 
                     let (sz, ct) = Self.directorySizeSync(fullPath)
-                    if sz > 100_000 { // >100KB
+                    if sz > ScanConstants.minCacheSizeBytes {
                         paths.append(fullPath)
                         breakdown.append(PathStat(path: fullPath, size: sz, fileCount: ct))
                         totalSize += sz
                         totalCount += ct
                     }
+                    } // autoreleasepool
                 }
 
-                guard totalSize > 500_000, !paths.isEmpty else {
+                guard totalSize > ScanConstants.minCacheTotalBytes, !paths.isEmpty else {
                     continuation.resume(returning: nil)
                     return
                 }
@@ -819,8 +893,9 @@ class CleanupManager {
         let dir = "/Library/Caches"
         guard fm.fileExists(atPath: dir) else { return nil }
 
+        let scannedSnapshot = scannedPathsSnapshot()
         return await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [scannedPaths] in
+            DispatchQueue.global(qos: .userInitiated).async {
                 guard let entries = try? fm.contentsOfDirectory(atPath: dir) else {
                     continuation.resume(returning: nil)
                     return
@@ -832,19 +907,21 @@ class CleanupManager {
                 var totalCount: Int = 0
 
                 for entry in entries {
+                    autoreleasepool {
                     let fullPath = (dir as NSString).appendingPathComponent(entry)
-                    if scannedPaths.contains(fullPath) { continue }
+                    if scannedSnapshot.contains(fullPath) { return }
 
                     let (sz, ct) = Self.directorySizeSync(fullPath)
-                    if sz > 500_000 { // >500KB
+                    if sz > ScanConstants.minSystemCacheSizeBytes {
                         paths.append(fullPath)
                         breakdown.append(PathStat(path: fullPath, size: sz, fileCount: ct))
                         totalSize += sz
                         totalCount += ct
                     }
+                    } // autoreleasepool
                 }
 
-                guard totalSize > 1_000_000, !paths.isEmpty else {
+                guard totalSize > ScanConstants.minSystemCacheTotalBytes, !paths.isEmpty else {
                     continuation.resume(returning: nil)
                     return
                 }
@@ -1397,7 +1474,7 @@ class CleanupManager {
         found: inout [String], breakdown: inout [PathStat],
         totalSize: inout Int64, totalCount: inout Int
     ) {
-        guard depth <= maxDepth else { return }
+        guard depth < maxDepth else { return }
         guard let entries = try? fm.contentsOfDirectory(atPath: dir) else { return }
 
         for entry in entries {

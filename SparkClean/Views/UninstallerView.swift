@@ -266,6 +266,14 @@ class UninstallerManager {
     // MARK: - Uninstall
 
     func uninstallApp(_ app: AppInfo, trashOnly: Bool = true) async -> Bool {
+        // Check if app is running
+        let runningApps = NSWorkspace.shared.runningApplications
+        if let running = runningApps.first(where: { $0.bundleIdentifier == app.bundleID }) {
+            running.terminate()
+            // Give it a moment to quit
+            try? await Task.sleep(for: .seconds(1))
+        }
+
         return await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let fm = FileManager.default
@@ -276,7 +284,7 @@ class UninstallerManager {
                     let url = URL(fileURLWithPath: related.path)
                     if trashOnly {
                         if (try? fm.trashItem(at: url, resultingItemURL: nil)) == nil {
-                            try? fm.removeItem(at: url)
+                            do { try fm.removeItem(at: url) } catch { success = false }
                         }
                     } else {
                         do { try fm.removeItem(at: url) } catch { success = false }
@@ -424,6 +432,7 @@ struct UninstallerView: View {
     @State private var showUninstallAlert = false
     @State private var appToUninstall: AppInfo? = nil
     @State private var showExportSheet = false
+    @State private var isUninstalling = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -463,11 +472,13 @@ struct UninstallerView: View {
             Button("Move to Trash", role: .destructive) {
                 if let app = appToUninstall {
                     Task {
+                        isUninstalling = true
                         let success = await uninstaller.uninstallApp(app)
                         if success {
                             selectedApp = nil
                             await uninstaller.scanApps()
                         }
+                        isUninstalling = false
                     }
                 }
             }
@@ -675,16 +686,24 @@ struct UninstallerView: View {
                         showUninstallAlert = true
                     } label: {
                         HStack(spacing: 8) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Uninstall \(app.name)")
-                                .font(.system(size: 14, weight: .semibold))
+                            if isUninstalling {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text("Uninstalling...")
+                                    .font(.system(size: 14, weight: .semibold))
+                            } else {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text("Uninstall \(app.name)")
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
                         }
                         .padding(.horizontal, 24)
                         .padding(.vertical, 10)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.red)
+                    .disabled(isUninstalling)
                     Spacer()
                 }
             }
