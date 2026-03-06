@@ -1,13 +1,13 @@
 //
-//  MacSimpleCleanupUITestsLaunchTests.swift
-//  MacSimpleCleanupUITests
+//  SparkCleanUITestsLaunchTests.swift
+//  SparkCleanUITests
 //
 //  Created by George Khananaev on 3/6/26.
 //
 
 import XCTest
 
-final class MacSimpleCleanupUITestsLaunchTests: XCTestCase {
+final class SparkCleanUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

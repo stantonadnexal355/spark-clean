@@ -12,37 +12,37 @@
 			containerPortal = 5E3B04E02F5A464D00543812 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 5E3B04E72F5A464D00543812;
-			remoteInfo = MacSimpleCleanup;
+			remoteInfo = SparkClean;
 		};
 		5E3B05002F5A464E00543812 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5E3B04E02F5A464D00543812 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 5E3B04E72F5A464D00543812;
-			remoteInfo = MacSimpleCleanup;
+			remoteInfo = SparkClean;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5E3B04E82F5A464D00543812 /* MacSimpleCleanup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSimpleCleanup.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5E3B04F52F5A464E00543812 /* MacSimpleCleanupTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSimpleCleanupTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5E3B04FF2F5A464E00543812 /* MacSimpleCleanupUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSimpleCleanupUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5E3B04E82F5A464D00543812 /* SparkClean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = SparkClean.app; path = SparkClean.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5E3B04F52F5A464E00543812 /* SparkCleanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SparkCleanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5E3B04FF2F5A464E00543812 /* SparkCleanUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SparkCleanUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		5E3B04EA2F5A464D00543812 /* MacSimpleCleanup */ = {
+		5E3B04EA2F5A464D00543812 /* SparkClean */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MacSimpleCleanup;
+			path = SparkClean;
 			sourceTree = "<group>";
 		};
-		5E3B04F82F5A464E00543812 /* MacSimpleCleanupTests */ = {
+		5E3B04F82F5A464E00543812 /* SparkCleanTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MacSimpleCleanupTests;
+			path = SparkCleanTests;
 			sourceTree = "<group>";
 		};
-		5E3B05022F5A464E00543812 /* MacSimpleCleanupUITests */ = {
+		5E3B05022F5A464E00543812 /* SparkCleanUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MacSimpleCleanupUITests;
+			path = SparkCleanUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +75,9 @@
 		5E3B04DF2F5A464D00543812 = {
 			isa = PBXGroup;
 			children = (
-				5E3B04EA2F5A464D00543812 /* MacSimpleCleanup */,
-				5E3B04F82F5A464E00543812 /* MacSimpleCleanupTests */,
-				5E3B05022F5A464E00543812 /* MacSimpleCleanupUITests */,
+				5E3B04EA2F5A464D00543812 /* SparkClean */,
+				5E3B04F82F5A464E00543812 /* SparkCleanTests */,
+				5E3B05022F5A464E00543812 /* SparkCleanUITests */,
 				5E3B04E92F5A464D00543812 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +85,9 @@
 		5E3B04E92F5A464D00543812 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5E3B04E82F5A464D00543812 /* MacSimpleCleanup.app */,
-				5E3B04F52F5A464E00543812 /* MacSimpleCleanupTests.xctest */,
-				5E3B04FF2F5A464E00543812 /* MacSimpleCleanupUITests.xctest */,
+				5E3B04E82F5A464D00543812 /* SparkClean.app */,
+				5E3B04F52F5A464E00543812 /* SparkCleanTests.xctest */,
+				5E3B04FF2F5A464E00543812 /* SparkCleanUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		5E3B04E72F5A464D00543812 /* MacSimpleCleanup */ = {
+		5E3B04E72F5A464D00543812 /* SparkClean */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5E3B05092F5A464E00543812 /* Build configuration list for PBXNativeTarget "MacSimpleCleanup" */;
+			buildConfigurationList = 5E3B05092F5A464E00543812 /* Build configuration list for PBXNativeTarget "SparkClean" */;
 			buildPhases = (
 				5E3B04E42F5A464D00543812 /* Sources */,
 				5E3B04E52F5A464D00543812 /* Frameworks */,
@@ -108,18 +108,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				5E3B04EA2F5A464D00543812 /* MacSimpleCleanup */,
+				5E3B04EA2F5A464D00543812 /* SparkClean */,
 			);
-			name = MacSimpleCleanup;
+			name = SparkClean;
 			packageProductDependencies = (
 			);
-			productName = MacSimpleCleanup;
-			productReference = 5E3B04E82F5A464D00543812 /* MacSimpleCleanup.app */;
+			productName = SparkClean;
+			productReference = 5E3B04E82F5A464D00543812 /* SparkClean.app */;
 			productType = "com.apple.product-type.application";
 		};
-		5E3B04F42F5A464E00543812 /* MacSimpleCleanupTests */ = {
+		5E3B04F42F5A464E00543812 /* SparkCleanTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5E3B050C2F5A464E00543812 /* Build configuration list for PBXNativeTarget "MacSimpleCleanupTests" */;
+			buildConfigurationList = 5E3B050C2F5A464E00543812 /* Build configuration list for PBXNativeTarget "SparkCleanTests" */;
 			buildPhases = (
 				5E3B04F12F5A464E00543812 /* Sources */,
 				5E3B04F22F5A464E00543812 /* Frameworks */,
@@ -131,18 +131,18 @@
 				5E3B04F72F5A464E00543812 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				5E3B04F82F5A464E00543812 /* MacSimpleCleanupTests */,
+				5E3B04F82F5A464E00543812 /* SparkCleanTests */,
 			);
-			name = MacSimpleCleanupTests;
+			name = SparkCleanTests;
 			packageProductDependencies = (
 			);
-			productName = MacSimpleCleanupTests;
-			productReference = 5E3B04F52F5A464E00543812 /* MacSimpleCleanupTests.xctest */;
+			productName = SparkCleanTests;
+			productReference = 5E3B04F52F5A464E00543812 /* SparkCleanTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		5E3B04FE2F5A464E00543812 /* MacSimpleCleanupUITests */ = {
+		5E3B04FE2F5A464E00543812 /* SparkCleanUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5E3B050F2F5A464E00543812 /* Build configuration list for PBXNativeTarget "MacSimpleCleanupUITests" */;
+			buildConfigurationList = 5E3B050F2F5A464E00543812 /* Build configuration list for PBXNativeTarget "SparkCleanUITests" */;
 			buildPhases = (
 				5E3B04FB2F5A464E00543812 /* Sources */,
 				5E3B04FC2F5A464E00543812 /* Frameworks */,
@@ -154,13 +154,13 @@
 				5E3B05012F5A464E00543812 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				5E3B05022F5A464E00543812 /* MacSimpleCleanupUITests */,
+				5E3B05022F5A464E00543812 /* SparkCleanUITests */,
 			);
-			name = MacSimpleCleanupUITests;
+			name = SparkCleanUITests;
 			packageProductDependencies = (
 			);
-			productName = MacSimpleCleanupUITests;
-			productReference = 5E3B04FF2F5A464E00543812 /* MacSimpleCleanupUITests.xctest */;
+			productName = SparkCleanUITests;
+			productReference = 5E3B04FF2F5A464E00543812 /* SparkCleanUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 5E3B04E32F5A464D00543812 /* Build configuration list for PBXProject "MacSimpleCleanup" */;
+			buildConfigurationList = 5E3B04E32F5A464D00543812 /* Build configuration list for PBXProject "SparkClean" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				5E3B04E72F5A464D00543812 /* MacSimpleCleanup */,
-				5E3B04F42F5A464E00543812 /* MacSimpleCleanupTests */,
-				5E3B04FE2F5A464E00543812 /* MacSimpleCleanupUITests */,
+				5E3B04E72F5A464D00543812 /* SparkClean */,
+				5E3B04F42F5A464E00543812 /* SparkCleanTests */,
+				5E3B04FE2F5A464E00543812 /* SparkCleanUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		5E3B04F72F5A464E00543812 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 5E3B04E72F5A464D00543812 /* MacSimpleCleanup */;
+			target = 5E3B04E72F5A464D00543812 /* SparkClean */;
 			targetProxy = 5E3B04F62F5A464E00543812 /* PBXContainerItemProxy */;
 		};
 		5E3B05012F5A464E00543812 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 5E3B04E72F5A464D00543812 /* MacSimpleCleanup */;
+			target = 5E3B04E72F5A464D00543812 /* SparkClean */;
 			targetProxy = 5E3B05002F5A464E00543812 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -389,11 +389,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SparkClean;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -407,14 +409,15 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = gk.MacSimpleCleanup;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = gk.SparkClean;
+				PRODUCT_NAME = SparkClean;
 				REGISTER_APP_GROUPS = YES;
-				SDKROOT = auto;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -431,11 +434,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SparkClean;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -449,14 +454,15 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = gk.MacSimpleCleanup;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = gk.SparkClean;
+				PRODUCT_NAME = SparkClean;
 				REGISTER_APP_GROUPS = YES;
-				SDKROOT = auto;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -472,22 +478,24 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = gk.MacSimpleCleanupTests;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = gk.SparkCleanTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MacSimpleCleanup.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MacSimpleCleanup";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SparkClean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SparkClean";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -497,22 +505,24 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = gk.MacSimpleCleanupTests;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = gk.SparkCleanTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MacSimpleCleanup.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MacSimpleCleanup";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SparkClean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SparkClean";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -521,22 +531,24 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = gk.MacSimpleCleanupUITests;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = gk.SparkCleanUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = MacSimpleCleanup;
+				TEST_TARGET_NAME = SparkClean;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -545,22 +557,24 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = gk.MacSimpleCleanupUITests;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = gk.SparkCleanUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
+				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = MacSimpleCleanup;
+				TEST_TARGET_NAME = SparkClean;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -568,7 +582,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5E3B04E32F5A464D00543812 /* Build configuration list for PBXProject "MacSimpleCleanup" */ = {
+		5E3B04E32F5A464D00543812 /* Build configuration list for PBXProject "SparkClean" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5E3B05072F5A464E00543812 /* Debug */,
@@ -577,7 +591,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5E3B05092F5A464E00543812 /* Build configuration list for PBXNativeTarget "MacSimpleCleanup" */ = {
+		5E3B05092F5A464E00543812 /* Build configuration list for PBXNativeTarget "SparkClean" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5E3B050A2F5A464E00543812 /* Debug */,
@@ -586,7 +600,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5E3B050C2F5A464E00543812 /* Build configuration list for PBXNativeTarget "MacSimpleCleanupTests" */ = {
+		5E3B050C2F5A464E00543812 /* Build configuration list for PBXNativeTarget "SparkCleanTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5E3B050D2F5A464E00543812 /* Debug */,
@@ -595,7 +609,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5E3B050F2F5A464E00543812 /* Build configuration list for PBXNativeTarget "MacSimpleCleanupUITests" */ = {
+		5E3B050F2F5A464E00543812 /* Build configuration list for PBXNativeTarget "SparkCleanUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5E3B05102F5A464E00543812 /* Debug */,
