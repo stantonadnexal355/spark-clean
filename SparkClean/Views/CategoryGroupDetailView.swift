@@ -19,11 +19,11 @@ struct CategoryGroupDetailView: View {
     }
 
     private var groupSize: Int64 {
-        groupCategories.reduce(0) { $0 + $1.size }
+        groupCategories.reduce(0) { $0 + $1.selectedSize }
     }
 
     private var selectedSize: Int64 {
-        groupCategories.filter(\.isSelected).reduce(0) { $0 + $1.size }
+        groupCategories.filter(\.isSelected).reduce(0) { $0 + $1.selectedSize }
     }
 
     var body: some View {
@@ -225,7 +225,7 @@ struct CategoryRowView: View {
         .opacity(isSelected ? 1.0 : 0.55)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(category.name), \(CleanupManager.formatBytes(category.size)), \(category.safetyLevel.rawValue)")
+        .accessibilityLabel("\(category.name), \(CleanupManager.formatBytes(category.selectedSize)), \(category.safetyLevel.rawValue)")
     }
 
     private func safetyTooltip(_ level: SafetyLevel) -> String {
@@ -263,7 +263,7 @@ struct PathBreakdownView: View {
                 Text(category.name)
                     .font(.headline)
                 Spacer()
-                Text("\(category.fileCount) files · \(CleanupManager.formatBytes(category.size))")
+                Text("\(category.selectedFileCount) files · \(CleanupManager.formatBytes(category.selectedSize))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -316,7 +316,7 @@ struct PathBreakdownView: View {
                                             .font(.system(size: 13, weight: .medium))
                                             .lineLimit(1)
                                     } else {
-                                        Text((stat.path as NSString).lastPathComponent)
+                                        Text(stat.displayName ?? (stat.path as NSString).lastPathComponent)
                                             .font(.system(size: 13, weight: .medium))
                                             .lineLimit(1)
                                         Text((stat.path as NSString).deletingLastPathComponent)
@@ -444,12 +444,12 @@ struct PathBreakdownView: View {
             DispatchQueue.main.async {
                 deletingModels.remove(modelName)
                 guard let catIdx = manager.categories.firstIndex(where: { $0.id == categoryID }) else { return }
-                if index < manager.categories[catIdx].breakdown.count {
-                    let removedSize = manager.categories[catIdx].breakdown[index].size
-                    manager.categories[catIdx].breakdown.remove(at: index)
-                    manager.categories[catIdx].size -= removedSize
-                    manager.categories[catIdx].fileCount -= 1
-                }
+                // Find by model name instead of index to avoid race condition
+                guard let breakdownIdx = manager.categories[catIdx].breakdown.firstIndex(where: { $0.path == modelName }) else { return }
+                let removedSize = manager.categories[catIdx].breakdown[breakdownIdx].size
+                manager.categories[catIdx].breakdown.remove(at: breakdownIdx)
+                manager.categories[catIdx].size -= removedSize
+                manager.categories[catIdx].fileCount -= 1
                 // Update description to reflect remaining models
                 let remaining = manager.categories[catIdx].breakdown.count
                 if remaining == 0 {
@@ -521,7 +521,9 @@ struct ExportReportView: View {
                 Button("Save...") {
                     let panel = NSSavePanel()
                     panel.allowedContentTypes = [.plainText]
-                    panel.nameFieldStringValue = "SparkClean_Report_\(Date().formatted(date: .numeric, time: .omitted)).txt"
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd"
+                    panel.nameFieldStringValue = "SparkClean_Report_\(dateFormatter.string(from: Date())).txt"
                     if panel.runModal() == .OK, let url = panel.url {
                         try? report.write(to: url, atomically: true, encoding: .utf8)
                     }

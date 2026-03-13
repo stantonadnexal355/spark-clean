@@ -39,7 +39,7 @@ struct DiskUsageCardView: View {
                                     endPoint: .trailing
                                 )
                             )
-                            .frame(width: max(0, geo.size.width * CGFloat(usedNonReclaimable) / CGFloat(disk.totalSpace)))
+                            .frame(width: max(0, geo.size.width * CGFloat(usedNonReclaimable) / CGFloat(max(1, disk.totalSpace))))
 
                         if reclaimable > 0 {
                             RoundedRectangle(cornerRadius: 0)
@@ -50,7 +50,7 @@ struct DiskUsageCardView: View {
                                         endPoint: .trailing
                                     )
                                 )
-                                .frame(width: max(0, geo.size.width * CGFloat(reclaimable) / CGFloat(disk.totalSpace)))
+                                .frame(width: max(0, geo.size.width * CGFloat(reclaimable) / CGFloat(max(1, disk.totalSpace))))
                         }
                     }
                 }
@@ -118,6 +118,8 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }
 
@@ -141,7 +143,7 @@ struct TopCategoryRow: View {
             GeometryReader { geo in
                 RoundedRectangle(cornerRadius: 4)
                     .fill(category.color.gradient)
-                    .frame(width: max(4, geo.size.width * CGFloat(category.size) / CGFloat(maxSize)))
+                    .frame(width: max(4, geo.size.width * CGFloat(category.size) / CGFloat(max(1, maxSize))))
             }
             .frame(height: 16)
 
@@ -204,6 +206,8 @@ struct GroupCard: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(group.rawValue): \(categories.count) categories, \(CleanupManager.formatBytes(groupSize))")
     }
 }
 
@@ -281,6 +285,7 @@ struct SidebarRow: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(Capsule().fill(iconColor.opacity(0.7)))
+                        .accessibilityLabel("\(badgeCount) items")
                 }
             }
             .contentShape(Rectangle())

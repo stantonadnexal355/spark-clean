@@ -71,13 +71,19 @@ struct SparkCleanApp: App {
                 Divider()
 
                 Button("Contact Support") {
-                    if let url = URL(string: "mailto:george@khananaev.com?subject=SparkClean%20Support") {
+                    if let url = URL(string: "https://github.com/georgekhananaev/spark-clean/issues") {
                         NSWorkspace.shared.open(url)
                     }
                 }
 
                 Button("Report a Bug") {
-                    if let url = URL(string: "mailto:george@khananaev.com?subject=SparkClean%20Bug%20Report&body=Please%20describe%20the%20issue:") {
+                    if let url = URL(string: "https://github.com/georgekhananaev/spark-clean/issues") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
+                Button("GitHub Repository") {
+                    if let url = URL(string: "https://github.com/georgekhananaev/spark-clean") {
                         NSWorkspace.shared.open(url)
                     }
                 }
@@ -107,8 +113,6 @@ struct SparkCleanApp: App {
 
 struct CustomAboutView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var isHoveringCopy = false
-
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
     }
@@ -189,7 +193,18 @@ struct CustomAboutView: View {
             VStack(alignment: .leading, spacing: 12) {
                 InfoSection(title: "Build Information", content: buildInfo)
 
-                InfoSection(title: "Developer", content: "George Khananaev\ngeorge@khananaev.com")
+                InfoSection(title: "Developer", content: "George Khananaev")
+
+                HStack(spacing: 4) {
+                    Text("SOURCE CODE")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .tracking(0.5)
+                    Spacer()
+                }
+                Link("github.com/georgekhananaev/spark-clean", destination: URL(string: "https://github.com/georgekhananaev/spark-clean")!)
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(.blue)
 
                 InfoSection(title: "Runtime", content: systemInfo)
             }

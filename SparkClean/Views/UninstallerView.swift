@@ -12,16 +12,17 @@ import AppKit
 
 @Observable
 class UninstallerManager {
-    var apps: [AppInfo] = []
+    var apps: [AppInfo] = [] { didSet { updateFilteredApps() } }
     var isScanning = false
     var scanComplete = false
-    var searchQuery = ""
-    var sortOrder: AppSortOrder = .totalSize
+    var searchQuery = "" { didSet { updateFilteredApps() } }
+    var sortOrder: AppSortOrder = .totalSize { didSet { updateFilteredApps() } }
     var selectedAppIDs: Set<UUID> = []
     var currentScanItem = ""
     var scanProgress: Double = 0
+    private(set) var filteredApps: [AppInfo] = []
 
-    var filteredApps: [AppInfo] {
+    private func updateFilteredApps() {
         var result = apps
         if !searchQuery.isEmpty {
             result = result.filter {
@@ -35,7 +36,7 @@ class UninstallerManager {
         case .appSize: result.sort { $0.appSize > $1.appSize }
         case .relatedSize: result.sort { $0.totalRelatedSize > $1.totalRelatedSize }
         }
-        return result
+        filteredApps = result
     }
 
     // MARK: - Scan All Apps
@@ -87,15 +88,15 @@ class UninstallerManager {
                         // Skip system apps
                         if systemBundles.contains(bundleID) { continue }
                         if bundleID.hasPrefix("com.apple.") { continue }
+                        if bundleID == "gk.SparkClean" { continue }
 
                         let appName = url.deletingPathExtension().lastPathComponent
-                        let icon = NSWorkspace.shared.icon(forFile: url.path)
 
                         let info = AppInfo(
                             name: appName,
                             bundleID: bundleID,
                             path: url.path,
-                            icon: icon
+                            icon: nil
                         )
                         results.append(info)
                     }
@@ -105,9 +106,17 @@ class UninstallerManager {
             }
         }
 
+        // Fetch icons on main thread (NSWorkspace is not thread-safe)
+        var appsWithIcons = foundApps
+        await MainActor.run {
+            for i in appsWithIcons.indices {
+                appsWithIcons[i].icon = NSWorkspace.shared.icon(forFile: appsWithIcons[i].path)
+            }
+        }
+
         // Calculate sizes for each app
-        let total = foundApps.count
-        for (index, app) in foundApps.enumerated() {
+        let total = appsWithIcons.count
+        for (index, app) in appsWithIcons.enumerated() {
             await MainActor.run {
                 currentScanItem = app.name
                 scanProgress = Double(index) / Double(max(total, 1))
@@ -137,7 +146,7 @@ class UninstallerManager {
                 var info = app
 
                 // App bundle size
-                info.appSize = Self.dirSize(app.path)
+                info.appSize = Self.dirSizeAndCount(app.path).size
 
                 // Find all related paths
                 var related: [RelatedPath] = []
@@ -148,15 +157,15 @@ class UninstallerManager {
                     // Caches
                     let cachePath = "\(home)/Library/Caches/\(bundleID)"
                     if fm.fileExists(atPath: cachePath) {
-                        let sz = Self.dirSize(cachePath)
-                        if sz > 0 { related.append(RelatedPath(path: cachePath, category: "Caches", size: sz, fileCount: Self.fileCount(cachePath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(cachePath)
+                        if sz > 0 { related.append(RelatedPath(path: cachePath, category: "Caches", size: sz, fileCount: cnt)) }
                     }
 
                     // Application Support (by bundle ID)
                     let supportPath = "\(home)/Library/Application Support/\(bundleID)"
                     if fm.fileExists(atPath: supportPath) {
-                        let sz = Self.dirSize(supportPath)
-                        if sz > 0 { related.append(RelatedPath(path: supportPath, category: "App Support", size: sz, fileCount: Self.fileCount(supportPath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(supportPath)
+                        if sz > 0 { related.append(RelatedPath(path: supportPath, category: "App Support", size: sz, fileCount: cnt)) }
                     }
 
                     // Preferences
@@ -169,8 +178,8 @@ class UninstallerManager {
                     // Containers
                     let containerPath = "\(home)/Library/Containers/\(bundleID)"
                     if fm.fileExists(atPath: containerPath) {
-                        let sz = Self.dirSize(containerPath)
-                        if sz > 0 { related.append(RelatedPath(path: containerPath, category: "Container", size: sz, fileCount: Self.fileCount(containerPath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(containerPath)
+                        if sz > 0 { related.append(RelatedPath(path: containerPath, category: "Container", size: sz, fileCount: cnt)) }
                     }
 
                     // Group Containers
@@ -178,23 +187,23 @@ class UninstallerManager {
                     if let groups = try? fm.contentsOfDirectory(atPath: groupDir) {
                         for group in groups where group.contains(bundleID) {
                             let groupPath = (groupDir as NSString).appendingPathComponent(group)
-                            let sz = Self.dirSize(groupPath)
-                            if sz > 0 { related.append(RelatedPath(path: groupPath, category: "Group Container", size: sz, fileCount: Self.fileCount(groupPath))) }
+                            let (sz, cnt) = Self.dirSizeAndCount(groupPath)
+                            if sz > 0 { related.append(RelatedPath(path: groupPath, category: "Group Container", size: sz, fileCount: cnt)) }
                         }
                     }
 
                     // Saved Application State
                     let statePath = "\(home)/Library/Saved Application State/\(bundleID).savedState"
                     if fm.fileExists(atPath: statePath) {
-                        let sz = Self.dirSize(statePath)
-                        if sz > 0 { related.append(RelatedPath(path: statePath, category: "Saved State", size: sz, fileCount: Self.fileCount(statePath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(statePath)
+                        if sz > 0 { related.append(RelatedPath(path: statePath, category: "Saved State", size: sz, fileCount: cnt)) }
                     }
 
                     // Logs
                     let logsPath = "\(home)/Library/Logs/\(bundleID)"
                     if fm.fileExists(atPath: logsPath) {
-                        let sz = Self.dirSize(logsPath)
-                        if sz > 0 { related.append(RelatedPath(path: logsPath, category: "Logs", size: sz, fileCount: Self.fileCount(logsPath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(logsPath)
+                        if sz > 0 { related.append(RelatedPath(path: logsPath, category: "Logs", size: sz, fileCount: cnt)) }
                     }
 
                     // Crash Reports
@@ -217,15 +226,15 @@ class UninstallerManager {
                     // WebKit data
                     let webkitPath = "\(home)/Library/WebKit/\(bundleID)"
                     if fm.fileExists(atPath: webkitPath) {
-                        let sz = Self.dirSize(webkitPath)
-                        if sz > 0 { related.append(RelatedPath(path: webkitPath, category: "WebKit Data", size: sz, fileCount: Self.fileCount(webkitPath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(webkitPath)
+                        if sz > 0 { related.append(RelatedPath(path: webkitPath, category: "WebKit Data", size: sz, fileCount: cnt)) }
                     }
 
                     // HTTPStorages
                     let httpPath = "\(home)/Library/HTTPStorages/\(bundleID)"
                     if fm.fileExists(atPath: httpPath) {
-                        let sz = Self.dirSize(httpPath)
-                        if sz > 0 { related.append(RelatedPath(path: httpPath, category: "HTTP Storage", size: sz, fileCount: Self.fileCount(httpPath))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(httpPath)
+                        if sz > 0 { related.append(RelatedPath(path: httpPath, category: "HTTP Storage", size: sz, fileCount: cnt)) }
                     }
                 }
 
@@ -234,24 +243,24 @@ class UninstallerManager {
                     let supportByName = "\(home)/Library/Application Support/\(appName)"
                     let alreadyFound = related.contains { $0.path == supportByName }
                     if !alreadyFound && fm.fileExists(atPath: supportByName) {
-                        let sz = Self.dirSize(supportByName)
-                        if sz > 0 { related.append(RelatedPath(path: supportByName, category: "App Support", size: sz, fileCount: Self.fileCount(supportByName))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(supportByName)
+                        if sz > 0 { related.append(RelatedPath(path: supportByName, category: "App Support", size: sz, fileCount: cnt)) }
                     }
 
                     // Caches by app name
                     let cacheByName = "\(home)/Library/Caches/\(appName)"
                     let cacheAlreadyFound = related.contains { $0.path == cacheByName }
                     if !cacheAlreadyFound && fm.fileExists(atPath: cacheByName) {
-                        let sz = Self.dirSize(cacheByName)
-                        if sz > 0 { related.append(RelatedPath(path: cacheByName, category: "Caches", size: sz, fileCount: Self.fileCount(cacheByName))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(cacheByName)
+                        if sz > 0 { related.append(RelatedPath(path: cacheByName, category: "Caches", size: sz, fileCount: cnt)) }
                     }
 
                     // Logs by app name
                     let logsByName = "\(home)/Library/Logs/\(appName)"
                     let logsAlreadyFound = related.contains { $0.path == logsByName }
                     if !logsAlreadyFound && fm.fileExists(atPath: logsByName) {
-                        let sz = Self.dirSize(logsByName)
-                        if sz > 0 { related.append(RelatedPath(path: logsByName, category: "Logs", size: sz, fileCount: Self.fileCount(logsByName))) }
+                        let (sz, cnt) = Self.dirSizeAndCount(logsByName)
+                        if sz > 0 { related.append(RelatedPath(path: logsByName, category: "Logs", size: sz, fileCount: cnt)) }
                     }
                 }
 
@@ -354,7 +363,7 @@ class UninstallerManager {
                     let url = URL(fileURLWithPath: related.path)
                     if trashOnly {
                         if (try? fm.trashItem(at: url, resultingItemURL: nil)) == nil {
-                            do { try fm.removeItem(at: url) } catch { success = false }
+                            success = false
                         }
                     } else {
                         do { try fm.removeItem(at: url) } catch { success = false }
@@ -365,7 +374,7 @@ class UninstallerManager {
                 let appURL = URL(fileURLWithPath: app.path)
                 if trashOnly {
                     if (try? fm.trashItem(at: appURL, resultingItemURL: nil)) == nil {
-                        do { try fm.removeItem(at: appURL) } catch { success = false }
+                        success = false
                     }
                 } else {
                     do { try fm.removeItem(at: appURL) } catch { success = false }
@@ -457,40 +466,25 @@ class UninstallerManager {
 
     // MARK: - Helpers
 
-    private static func dirSize(_ path: String) -> Int64 {
+    private static func dirSizeAndCount(_ path: String) -> (size: Int64, count: Int) {
         let fm = FileManager.default
         var total: Int64 = 0
+        var count = 0
         guard let enumerator = fm.enumerator(
             at: URL(fileURLWithPath: path),
             includingPropertiesForKeys: [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey],
             options: [],
             errorHandler: nil
-        ) else { return 0 }
+        ) else { return (0, 0) }
 
         for case let url as URL in enumerator {
             guard let rv = try? url.resourceValues(forKeys: [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey]) else { continue }
             if rv.isRegularFile == true {
                 total += Int64(rv.totalFileAllocatedSize ?? rv.fileSize ?? 0)
-            }
-        }
-        return total
-    }
-
-    private static func fileCount(_ path: String) -> Int {
-        let fm = FileManager.default
-        var count = 0
-        guard let enumerator = fm.enumerator(
-            at: URL(fileURLWithPath: path),
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [],
-            errorHandler: nil
-        ) else { return 0 }
-        for case let url as URL in enumerator {
-            if let rv = try? url.resourceValues(forKeys: [.isRegularFileKey]), rv.isRegularFile == true {
                 count += 1
             }
         }
-        return count
+        return (total, count)
     }
 }
 
@@ -534,6 +528,7 @@ struct UninstallerView: View {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Dismiss")
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
@@ -630,6 +625,7 @@ struct UninstallerView: View {
             }
 
             Button {
+                selectedApp = nil
                 Task { await uninstaller.scanApps() }
             } label: {
                 HStack(spacing: 6) {

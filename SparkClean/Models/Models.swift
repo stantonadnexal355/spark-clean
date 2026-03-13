@@ -42,7 +42,7 @@ enum CategoryGroup: String, CaseIterable, Identifiable, Codable {
         case .browsers: .orange
         case .developer: .pink
         case .packageManagers: .green
-        case .largeFiles: .orange
+        case .largeFiles: .yellow
         case .docker: .cyan
         case .applications: .purple
         }
@@ -109,6 +109,7 @@ struct PathStat: Identifiable {
     var children: [PathStat] = []
     var lastAccessed: Date? = nil
     var isSelected: Bool = true
+    var displayName: String? = nil
 }
 
 struct CleanupCategory: Identifiable, Equatable {
@@ -213,7 +214,7 @@ struct AppInfo: Identifiable, Equatable {
     let name: String
     let bundleID: String
     let path: String
-    let icon: NSImage?
+    var icon: NSImage?
     var appSize: Int64 = 0
     var relatedPaths: [RelatedPath] = []
     var totalRelatedSize: Int64 = 0

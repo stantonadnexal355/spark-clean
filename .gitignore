@@ -10,6 +10,12 @@ DerivedData/
 *.swp
 *~
 
+# Release artifacts (use GitHub Releases for distribution)
+release/
+
+# Large media files
+*.mp4
+
 # JetBrains
 .idea/
 

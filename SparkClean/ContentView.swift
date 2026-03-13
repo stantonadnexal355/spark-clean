@@ -457,7 +457,7 @@ struct DashboardView: View {
 
     private var smartRecommendation: some View {
         let safeCats = manager.categories.filter { $0.safetyLevel == .safe && $0.isSelected }
-        let safeSize = safeCats.reduce(0 as Int64) { $0 + $1.size }
+        let safeSize = safeCats.reduce(0 as Int64) { $0 + $1.selectedSize }
         return HStack(spacing: 12) {
             Image(systemName: "lightbulb.fill")
                 .foregroundStyle(.yellow)
@@ -668,7 +668,7 @@ struct CleanConfirmationSheet: View {
     let onConfirm: () -> Void
 
     private var selectedCategories: [CleanupCategory] {
-        manager.categories.filter { $0.isSelected && $0.size > 0 }
+        manager.categories.filter { $0.isSelected && $0.selectedSize > 0 }
     }
 
     private var safeCount: Int { selectedCategories.filter { $0.safetyLevel == .safe }.count }
@@ -719,44 +719,55 @@ struct CleanConfirmationSheet: View {
                         }
                     }
 
-                    // Category list
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Selected for Removal")
-                            .font(.headline)
+                    // Category list — split by deletion method
+                    let trashItems = selectedCategories.filter { !$0.isDockerResource && !$0.isOllamaResource }
+                    let permanentItems = selectedCategories.filter { $0.isDockerResource || $0.isOllamaResource }
 
-                        ForEach(selectedCategories) { cat in
-                            HStack(spacing: 10) {
-                                Image(systemName: cat.safetyLevel.icon)
+                    if !trashItems.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "trash")
                                     .font(.caption)
-                                    .foregroundStyle(cat.safetyLevel.color)
-                                    .frame(width: 16)
-
-                                Image(systemName: cat.icon)
-                                    .font(.caption)
-                                    .foregroundStyle(cat.color)
-                                    .frame(width: 16)
-
-                                Text(cat.name)
-                                    .font(.callout)
-
-                                Spacer()
-
-                                Text("\(cat.fileCount) items")
+                                    .foregroundStyle(.blue)
+                                Text("Moved to Trash")
+                                    .font(.headline)
+                                Text("(recoverable)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-
-                                Text(CleanupManager.formatBytes(cat.selectedSize))
-                                    .font(.callout)
-                                    .fontWeight(.medium)
-                                    .monospacedDigit()
                             }
-                            .padding(.vertical, 4)
-                            .padding(.horizontal, 10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(cat.safetyLevel == .caution ? Color.red.opacity(0.06) : Color.primary.opacity(0.03))
-                            )
+
+                            ForEach(trashItems) { cat in
+                                categoryRow(for: cat)
+                            }
                         }
+                    }
+
+                    if !permanentItems.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                                Text("Permanently Deleted")
+                                    .font(.headline)
+                                Text("(cannot be undone)")
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
+
+                            ForEach(permanentItems) { cat in
+                                categoryRow(for: cat, permanent: true)
+                            }
+                        }
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.red.opacity(0.05))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .strokeBorder(Color.red.opacity(0.2), lineWidth: 1)
+                                )
+                        )
                     }
 
                     // Recovery note
@@ -830,6 +841,49 @@ struct CleanConfirmationSheet: View {
             .padding(20)
         }
         .frame(width: 560)
+    }
+
+    private func categoryRow(for cat: CleanupCategory, permanent: Bool = false) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: cat.safetyLevel.icon)
+                .font(.caption)
+                .foregroundStyle(cat.safetyLevel.color)
+                .frame(width: 16)
+
+            Image(systemName: cat.icon)
+                .font(.caption)
+                .foregroundStyle(cat.color)
+                .frame(width: 16)
+
+            Text(cat.name)
+                .font(.callout)
+
+            if permanent {
+                Text(cat.isDockerResource ? "via Docker CLI" : "via Ollama CLI")
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.red.opacity(0.1)))
+            }
+
+            Spacer()
+
+            Text("\(cat.selectedFileCount) items")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Text(CleanupManager.formatBytes(cat.selectedSize))
+                .font(.callout)
+                .fontWeight(.medium)
+                .monospacedDigit()
+        }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(permanent ? Color.red.opacity(0.06) : Color.primary.opacity(0.03))
+        )
     }
 
     private func summaryCard(_ title: String, value: String, color: Color) -> some View {
@@ -1049,6 +1103,7 @@ struct OnboardingView: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
+            .accessibilityLabel("Open \(title) settings")
         }
         .padding(14)
         .background(

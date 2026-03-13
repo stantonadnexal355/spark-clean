@@ -37,11 +37,11 @@ class CleanupManager {
     private let scannedPathsLock = OSAllocatedUnfairLock(initialState: Set<String>())
 
     var totalSize: Int64 {
-        filteredCategories.filter(\.isSelected).reduce(0) { $0 + $1.size }
+        filteredCategories.filter(\.isSelected).reduce(0) { $0 + $1.selectedSize }
     }
 
     var totalFiles: Int {
-        filteredCategories.filter(\.isSelected).reduce(0) { $0 + $1.fileCount }
+        filteredCategories.filter(\.isSelected).reduce(0) { $0 + $1.selectedFileCount }
     }
 
     var overallSize: Int64 {
@@ -65,7 +65,7 @@ class CleanupManager {
     }
 
     func sizeForGroup(_ group: CategoryGroup) -> Int64 {
-        categoriesForGroup(group).reduce(0) { $0 + $1.size }
+        categoriesForGroup(group).reduce(0) { $0 + $1.selectedSize }
     }
 
     func selectAll(in group: CategoryGroup) {
@@ -255,15 +255,26 @@ class CleanupManager {
         ScanDefinition(name: "Chrome Cache", icon: "globe", color: .yellow,
             description: "Chrome cache, GPU cache, service workers — rebuilt automatically",
             group: .browsers, safetyLevel: .safe) {
-            ["\(home)/Library/Caches/Google/Chrome",
-             "\(home)/Library/Application Support/Google/Chrome/Default/Service Worker",
-             "\(home)/Library/Application Support/Google/Chrome/Default/GPUCache",
-             "\(home)/Library/Application Support/Google/Chrome/Default/Code Cache",
-             "\(home)/Library/Application Support/Google/Chrome/Default/Cache",
-             "\(home)/Library/Application Support/Google/Chrome/ShaderCache",
-             "\(home)/Library/Application Support/Google/Chrome/GrShaderCache",
-             "\(home)/Library/Application Support/Google/Chrome/Profile 1/Cache",
-             "\(home)/Library/Application Support/Google/Chrome/Profile 1/Code Cache"]
+            var paths = [
+                "\(home)/Library/Caches/Google/Chrome",
+                "\(home)/Library/Application Support/Google/Chrome/Default/Service Worker",
+                "\(home)/Library/Application Support/Google/Chrome/Default/GPUCache",
+                "\(home)/Library/Application Support/Google/Chrome/Default/Code Cache",
+                "\(home)/Library/Application Support/Google/Chrome/Default/Cache",
+                "\(home)/Library/Application Support/Google/Chrome/ShaderCache",
+                "\(home)/Library/Application Support/Google/Chrome/GrShaderCache",
+            ]
+            // Dynamically discover all Chrome profile directories
+            let chromeAppSupport = "\(home)/Library/Application Support/Google/Chrome"
+            if let entries = try? FileManager.default.contentsOfDirectory(atPath: chromeAppSupport) {
+                for entry in entries where entry.hasPrefix("Profile ") {
+                    paths.append("\(chromeAppSupport)/\(entry)/Cache")
+                    paths.append("\(chromeAppSupport)/\(entry)/Code Cache")
+                    paths.append("\(chromeAppSupport)/\(entry)/Service Worker")
+                    paths.append("\(chromeAppSupport)/\(entry)/GPUCache")
+                }
+            }
+            return paths
         },
 
         ScanDefinition(name: "Firefox Cache", icon: "flame", color: .orange,
@@ -505,7 +516,7 @@ class CleanupManager {
             group: .applications, safetyLevel: .safe) {
             ["\(home)/Library/Caches/com.microsoft.Word",
              "\(home)/Library/Caches/com.microsoft.Excel",
-             "\(home)/Library/Caches/com.microsoft.Powerpoint",
+             "\(home)/Library/Caches/com.microsoft.PowerPoint",
              "\(home)/Library/Caches/com.microsoft.Outlook"]
         },
 
@@ -566,7 +577,7 @@ class CleanupManager {
         let scanScreenRecordings = settingScanScreenRecordings
         let scanVenvs = settingScanVirtualEnvironments
         let scanLargeFiles = settingScanLargeFiles
-        let estimatedSmartScans = 5 + (scanDocker ? 3 : 0) + (scanUnusedApps ? 1 : 0) + (scanNodeModules ? 1 : 0) + 2 + 1 + (scanIOSBackups ? 1 : 0) + (scanIMessage ? 1 : 0) + (scanBrokenSymlinks ? 1 : 0) + (scanScreenRecordings ? 1 : 0) + (scanVenvs ? 1 : 0) + (scanLargeFiles ? 1 : 0)
+        let estimatedSmartScans = 6 + (scanDocker ? 3 : 0) + (scanUnusedApps ? 1 : 0) + (scanNodeModules ? 1 : 0) + 2 + 1 + (scanIOSBackups ? 1 : 0) + (scanIMessage ? 1 : 0) + (scanBrokenSymlinks ? 1 : 0) + (scanScreenRecordings ? 1 : 0) + (scanVenvs ? 1 : 0) + (scanLargeFiles ? 1 : 0)
 
         // Phase 1: Specific known-safe targets
         // First pass: collect all paths so we can detect parent-child overlaps
@@ -787,18 +798,28 @@ class CleanupManager {
 
         for (catIndex, category) in selectedCategories.enumerated() {
             if category.isDockerResource, let command = category.dockerCleanCommand {
-                await runDockerClean(command: command)
+                let success = await runDockerClean(command: command)
                 await MainActor.run {
-                    cleanSuccessCount += 1
+                    if success {
+                        cleanSuccessCount += 1
+                    } else {
+                        cleanFailCount += 1
+                        cleanErrors.append("Failed to clean Docker resource: \(category.name)")
+                    }
                     cleanProgress = Double(catIndex + 1) / Double(totalCategories)
                 }
                 continue
             }
 
             if category.isOllamaResource {
-                await runOllamaClean(category: category)
+                let success = await runOllamaClean(category: category)
                 await MainActor.run {
-                    cleanSuccessCount += 1
+                    if success {
+                        cleanSuccessCount += 1
+                    } else {
+                        cleanFailCount += 1
+                        cleanErrors.append("Failed to clean Ollama resource: \(category.name)")
+                    }
                     cleanProgress = Double(catIndex + 1) / Double(totalCategories)
                 }
                 continue
@@ -820,8 +841,18 @@ class CleanupManager {
                 DispatchQueue.global(qos: .userInitiated).async {
                     let fm = FileManager.default
                     var localErrors: [String] = []
+                    let uid = getuid()
+
+                    func isOwnedByUser(_ path: String) -> Bool {
+                        guard let attrs = try? fm.attributesOfItem(atPath: path),
+                              let ownerID = attrs[.ownerAccountID] as? UInt32 else { return false }
+                        return ownerID == uid
+                    }
 
                     func deleteItem(at url: URL) {
+                        // Skip files/dirs we can't delete — silently
+                        if !fm.isDeletableFile(atPath: url.path) { return }
+
                         if useTrash {
                             if (try? fm.trashItem(at: url, resultingItemURL: nil)) == nil {
                                 do {
@@ -845,7 +876,7 @@ class CleanupManager {
                             do {
                                 contents = try fm.contentsOfDirectory(atPath: path)
                             } catch {
-                                localErrors.append("\(categoryName): Cannot read \(path) — \(error.localizedDescription)")
+                                // Skip directories we can't read (permission denied)
                                 continue
                             }
                             for item in contents {
@@ -940,6 +971,8 @@ class CleanupManager {
                 forKeys: [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey]
             ) else { continue }
             if rv.isRegularFile == true {
+                // Skip files we can't delete
+                if !fm.isDeletableFile(atPath: fileURL.path) { continue }
                 totalSize += Int64(rv.totalFileAllocatedSize ?? rv.fileSize ?? 0)
                 count += 1
             }
@@ -972,6 +1005,8 @@ class CleanupManager {
                 forKeys: [.totalFileAllocatedSizeKey, .fileSizeKey, .isRegularFileKey]
             ) else { continue }
             if rv.isRegularFile == true {
+                // Skip files we can't delete
+                if !fm.isDeletableFile(atPath: filePath) { continue }
                 totalSize += Int64(rv.totalFileAllocatedSize ?? rv.fileSize ?? 0)
                 count += 1
             }
@@ -1558,20 +1593,24 @@ class CleanupManager {
         return nil
     }
 
-    private func runDockerClean(command: [String]) async {
-        guard let dockerPath = Self.findDocker() else { return }
-        _ = Self.runCommand(dockerPath, arguments: command)
+    private func runDockerClean(command: [String]) async -> Bool {
+        guard let dockerPath = Self.findDocker() else { return false }
+        return Self.runCommand(dockerPath, arguments: command) != nil
     }
 
-    private func runOllamaClean(category: CleanupCategory) async {
-        guard let ollamaPath = Self.findOllama() else { return }
+    private func runOllamaClean(category: CleanupCategory) async -> Bool {
+        guard let ollamaPath = Self.findOllama() else { return false }
         // Remove each selected model individually via `ollama rm <model>`
         let selectedModels = category.hasPerFileSelection
             ? category.breakdown.filter(\.isSelected).map(\.path)
             : category.breakdown.map(\.path)
+        var anySuccess = false
         for model in selectedModels {
-            _ = Self.runCommand(ollamaPath, arguments: ["rm", model])
+            if Self.runCommand(ollamaPath, arguments: ["rm", model]) != nil {
+                anySuccess = true
+            }
         }
+        return anySuccess
     }
 
     // MARK: - node_modules
@@ -1599,7 +1638,6 @@ class CleanupManager {
             let modelName = columns[0]
             let sizeStr = columns[2]
             let sizeBytes = Self.parseDockerSize(sizeStr)
-            let modified = columns.count >= 4 ? columns[3] : ""
 
             totalSize += sizeBytes
             breakdown.append(PathStat(
@@ -2025,13 +2063,16 @@ class CleanupManager {
                 breakdown.sort { $0.size > $1.size }
                 let capped = Array(breakdown.prefix(maxResults))
                 let cappedPaths = capped.map(\.path)
+                guard !filePaths.isEmpty else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
                 let cappedSize = capped.reduce(0 as Int64) { $0 + $1.size }
 
                 continuation.resume(returning: CleanupCategory(
                     name: "Large Files (>\(thresholdMB) MB)", icon: "doc.fill", color: .orange,
-                    description: filePaths.isEmpty
-                        ? "No large files found"
-                        : "\(filePaths.count) large files across user directories",
+                    description: "\(filePaths.count) large files across user directories",
                     group: .largeFiles, safetyLevel: .review,
                     paths: cappedPaths, breakdown: capped,
                     deleteChildrenOnly: false,
@@ -2182,10 +2223,8 @@ class CleanupManager {
                             _deviceName += " (\(fmt.string(from: date)))"
                         }
                     }
-                    _ = _deviceName // device name available for future use
-
                     filePaths.append(full)
-                    breakdown.append(PathStat(path: full, size: size, fileCount: count))
+                    breakdown.append(PathStat(path: full, size: size, fileCount: count, displayName: _deviceName))
                     totalSize += size
                 }
 
@@ -2451,7 +2490,7 @@ class CleanupManager {
         return nil
     }
 
-    static func runCommand(_ path: String, arguments: [String]) -> String? {
+    static func runCommand(_ path: String, arguments: [String], timeout: TimeInterval = 30) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: path)
         process.arguments = arguments
@@ -2460,7 +2499,18 @@ class CleanupManager {
         process.standardError = Pipe()
         do {
             try process.run()
+
+            // Terminate the process if it exceeds the timeout
+            let timeoutWorkItem = DispatchWorkItem {
+                if process.isRunning {
+                    process.terminate()
+                }
+            }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutWorkItem)
+
             process.waitUntilExit()
+            timeoutWorkItem.cancel()
+
             guard process.terminationStatus == 0 else { return nil }
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
