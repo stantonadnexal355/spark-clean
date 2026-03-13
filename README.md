@@ -1,5 +1,11 @@
 # SparkClean v1.0.0
 
+[![GitHub release](https://img.shields.io/github/v/release/georgekhananaev/spark-clean)](https://github.com/georgekhananaev/spark-clean/releases)
+[![License](https://img.shields.io/badge/license-Non--Commercial-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)](https://github.com/georgekhananaev/spark-clean)
+[![Swift](https://img.shields.io/badge/Swift-5.9-orange)](https://swift.org)
+[![SwiftUI](https://img.shields.io/badge/UI-SwiftUI-blue)](https://developer.apple.com/swiftui/)
+
 **Your Mac is hoarding junk. SparkClean finds it and takes out the trash.**
 
 SparkClean is a free, open-source macOS app built with developers in mind. If you work with Docker, Xcode, Node.js, Ollama, JetBrains, Homebrew, or any other dev tools, you know how fast your disk fills up with stuff you didn't even know was there. Dangling Docker images, forgotten Ollama models, abandoned `node_modules`, Xcode DerivedData from three projects ago, stale CocoaPods caches... it adds up fast.
