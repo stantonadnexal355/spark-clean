@@ -119,10 +119,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 See [LICENSE](LICENSE) for the full terms.
 
-## Author
-
-**George Khananaev**
-
 ## Supported Devices
 
 See [SUPPORTED.md](SUPPORTED.md) for tested devices, OS versions, and compatibility info.
@@ -130,3 +126,7 @@ See [SUPPORTED.md](SUPPORTED.md) for tested devices, OS versions, and compatibil
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+
+## Author
+
+**George Khananaev**
